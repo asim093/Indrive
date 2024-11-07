@@ -1,37 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import { useAuth } from "@/components/Authentication_context";
+import Login from "./Auth/Login";
+import Signup from "./Auth/Signup";
+import Adddriver from "./Admin/Adddriver";
+import Editdriver from "./Admin/Editdriver";
+import Showdriver from "./Admin/Showdriver";
+import Admin from "./Admin/Main";
+import Home from "./UserPanel/Home";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+const Stack = createStackNavigator();
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
+const RootLayout = () => {
+  const { user } = useAuth();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!user ? (
+        <>
+          <Stack.Screen name="Auth/Login" component={Login} />
+          <Stack.Screen name="Auth/Signup" component={Signup} />
+        </>
+      ) : (
+        <>
+          {user.role === "admin" ? (
+            <>
+              <Stack.Screen name="Admin/Main" component={Admin} />
+              <Stack.Screen name="Admin/Adddriver" component={Adddriver} />
+              <Stack.Screen name="Admin/Editdriver" component={Editdriver} />
+              <Stack.Screen name="Admin/Showdriver" component={Showdriver} />
+            </>
+          ) : (
+            <Stack.Screen name="UserPanel/Home" component={Home} />
+          )}
+        </>
+      )}
+    </Stack.Navigator>
   );
-}
+};
+
+export default RootLayout;
