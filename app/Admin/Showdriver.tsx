@@ -57,7 +57,7 @@ const Showdriver = () => {
   const handleEdit = (item: Driver) => {
     router.push({
       pathname: "/Admin/Editdriver",
-      params: {
+      query: {
         id: item.id,
         driverName: item.driverName,
         phoneNumber: item.phoneNumber,
@@ -83,20 +83,16 @@ const Showdriver = () => {
           onPress={() => {
             router.push({
               pathname: "/Admin/Driverdetails",
-              params: {
+              query: {
                 id: item.id,
                 driverName: item.driverName,
-                driveremail: item.email,
                 phoneNumber: item.phoneNumber,
                 vehicle: item.vehicle,
               },
             });
           }}
         />
-        <Button
-          title="Edit"
-          onPress={() => handleEdit(item)}
-        />
+        <Button title="Edit" onPress={() => handleEdit(item)} />
         <Button title="Delete" onPress={() => handleDelete(item.id)} />
       </View>
     </View>

@@ -6,97 +6,91 @@ import {
   TextInput,
   Button,
   View,
-  Picker
 } from "react-native";
-import { getFirestore, collection, addDoc, doc, updateDoc } from "firebase/firestore"; 
+import { Picker } from "@react-native-picker/picker";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import AdminPanel from "../../components/Admin_Layout";
 import "../../global.css";
-import { app } from "../../config/firebase/config"; 
+import { app, auth } from "../../config/firebase/config";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const AddDriver = () => {
-  const db = getFirestore(app); 
-  const [driverName, setDriverName] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
+  const db = getFirestore(app);
+  const [driverName, setDriverName] = useState<string>("");
+  const [vehicle, setVehicle] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const validatePhoneNumber = (number: string) => {
-    const phoneRegex = /^[0-9]{11}$/; 
+    const phoneRegex = /^[0-9]{11}$/;
     return phoneRegex.test(number);
   };
 
   const handleSubmit = async () => {
-    // Check for empty fields
-    if (!driverName || !vehicle || !phoneNumber || !email) {
+    if (!driverName || !vehicle || !phoneNumber || !email || !password) {
       alert("Validation Error: Please fill in all fields.");
-      return; // Stop the submission
+      return;
     }
 
-    // Validate phone number
     if (!validatePhoneNumber(phoneNumber)) {
       alert("Invalid Phone Number: Please enter a valid 11-digit phone number.");
-      return; // Stop the submission
+      return;
     }
 
     try {
-      // Add the driver document to Firestore
       const docRef = await addDoc(collection(db, "drivers"), {
         driverName,
         vehicle,
         phoneNumber,
         email,
+        Role: "driver",
       });
 
-      // Update the document to include the generated ID
-      const driverDocRef = doc(db, "drivers", docRef.id); // Get a reference to the newly created document
-      await updateDoc(driverDocRef, { id: docRef.id }); // Update the document with the ID
+      await createUserWithEmailAndPassword(auth, email, password);
+
+      await updateDoc(docRef, { id: docRef.id });
 
       alert("Driver added successfully");
 
-      // Clear the form fields after successful submission
       setDriverName("");
       setVehicle("");
       setPhoneNumber("");
       setEmail("");
-    } catch (e) {
-      console.error("Error adding driver: ", e);
+      setPassword("");
+    } catch (e:any) {
+      alert("Error adding driver: " + e.message);
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <AdminPanel>
-        <ScrollView className="p-4 flex-grow border border-indigo-600 h-full">
+        <ScrollView style={{ padding: 16 }}>
           <Text style={{ marginVertical: 10, fontSize: 30, textAlign: "center" }}>
             Add Driver
           </Text>
 
           <View style={{ marginVertical: 10 }}>
-            <Text className="font-semibold mb-1">Driver Name:</Text>
+            <Text>Driver Name:</Text>
             <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: "#d1d5db",
-                borderRadius: 5,
-                padding: 10,
-                width: "100%",
-              }}
+              style={{ borderWidth: 1, borderColor: "#d1d5db", borderRadius: 5, padding: 10 }}
               value={driverName}
               onChangeText={setDriverName}
             />
           </View>
 
           <View style={{ marginVertical: 10 }}>
-            <Text className="font-semibold mb-1">Vehicle:</Text>
+            <Text>Vehicle:</Text>
             <Picker
               selectedValue={vehicle}
-              style={{
-                height: 50,
-                width: "100%",
-                borderColor: "#d1d5db",
-                borderWidth: 1,
-                borderRadius: 5,
-              }}
+              style={{ height: 50, borderColor: "#d1d5db", borderWidth: 1, borderRadius: 5 }}
               onValueChange={(itemValue: string) => setVehicle(itemValue)}
             >
               <Picker.Item label="Select Vehicle" value="" />
@@ -109,35 +103,33 @@ const AddDriver = () => {
           </View>
 
           <View style={{ marginVertical: 10 }}>
-            <Text className="font-semibold mb-1">Phone Number:</Text>
+            <Text>Phone Number:</Text>
             <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: "#d1d5db",
-                borderRadius: 5,
-                padding: 10,
-                width: "100%",
-              }}
+              style={{ borderWidth: 1, borderColor: "#d1d5db", borderRadius: 5, padding: 10 }}
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
-              maxLength={11} 
+              maxLength={11}
             />
           </View>
 
           <View style={{ marginVertical: 10 }}>
-            <Text className="font-semibold mb-1">Email:</Text>
+            <Text>Email:</Text>
             <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: "#d1d5db",
-                borderRadius: 5,
-                padding: 10,
-                width: "100%",
-              }}
+              style={{ borderWidth: 1, borderColor: "#d1d5db", borderRadius: 5, padding: 10 }}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
+            />
+          </View>
+
+          <View style={{ marginVertical: 10 }}>
+            <Text>Password:</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: "#d1d5db", borderRadius: 5, padding: 10 }}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={true}
             />
           </View>
 

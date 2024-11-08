@@ -1,41 +1,46 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+// // AuthContext.tsx
 
-interface User {
-  id: string;
-  email: any;
-  role: "admin" | "user";
-}
+// import React, { createContext, useState, useEffect, ReactNode } from "react";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { useRouter } from "expo-router";
 
-interface AuthContextType {
-  user: User | null;
-  login: (userData: User) => void;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  logout: () => void;
-  isAdmin: boolean; // Add isAdmin here
-}
+// // Define the structure of the AuthContext
+// type AuthContextType = {
+//   userRole: string | null;
+//   setUserRole: (role: string) => void;
+// };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// export const AuthContext = createContext<AuthContextType>({
+//   userRole: null,
+//   setUserRole: () => {},
+// });
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+// export const AuthProvider = ({ children }: { children: ReactNode }) => {
+//   const [userRole, setUserRole] = useState<string | null>(null);
+//   const router = useRouter();
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+//   useEffect(() => {
+//     const checkUserRole = async () => {
+//       const storedRole = await AsyncStorage.getItem("userRole");
+//       if (storedRole) {
+//         setUserRole(storedRole);
+//       }
+//     };
 
-  const login = (userData: User) => setUser(userData);
-  const logout = () => setUser(null);
+//     checkUserRole();
+//   }, []);
 
-  // Add isAdmin based on the user's role
-  const isAdmin = user?.role === "admin";
+//   useEffect(() => {
+//     if (userRole === "admin") {
+//       router.push("/Admin/Main");
+//     } else if (userRole === "user") {
+//       router.push("/UserPanel/Home");
+//     }
+//   }, [userRole, router]);
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, isAdmin }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+//   return (
+//     <AuthContext.Provider value={{ userRole, setUserRole }}>
+//       {children}
+//     </AuthContext.Provider>
+//   );
+// };

@@ -6,45 +6,69 @@ import {
   StyleSheet,
   Button,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/config/firebase/config"; 
+import { auth } from "@/config/firebase/config";
 import { Link, useRouter } from "expo-router";
-import { useAuth } from "@/components/Authentication_context"; 
 import Login_layout from "@/components/Login_layout";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = () => {
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
+  const [loading, isLoading] = useState("");
+  const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
-  const { setUser } = useAuth(); 
 
-  const registerUser = async () => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+  useEffect(() => {
+    const checkRoleFromStorage = async () => {
+      const storedRole = await AsyncStorage.getItem("userRole");
+      if (storedRole) {
+        setUserRole(storedRole);
+      }
+    };
 
-      setUser({
-        id: user.uid,
-        email: user.email,
-        role: user.email === "admin@gmail.com" ? "admin" : "user",  
-      });
+    checkRoleFromStorage();
+  }, []);
 
-      if (user.email === "admin@gmail.com") {  
+  useEffect(() => {
+    if (userRole) {
+      if (userRole === "admin") {
         alert("Admin Login Successfully");
+
+        window.location.reload();
         router.push("/Admin/Main");
       } else {
         alert("User Login Successfully");
-        router.push("/UserPanel/Home");  
+
+        window.location.reload();
+        router.push("/UserPanel/Home");
       }
+    }
+  }, [userRole]);
+
+  const loginUser = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      const role = user.email === "admin@gmail.com" ? "admin" : "user";
+      await AsyncStorage.setItem("userRole", role);
+
+      setUserRole(role); // This will trigger the useEffect for navigation
     } catch (error: any) {
-      alert(error.message); 
+      alert(error.message);
     }
   };
 
   return (
     <SafeAreaProvider>
+      {}
       <Login_layout>
         <Text style={{ textAlign: "center", fontSize: 20, margin: 20 }}>
           Login User
@@ -63,7 +87,7 @@ const Login = () => {
           secureTextEntry={true}
         />
         <View style={{ margin: 10 }}>
-          <Button title="Login" onPress={registerUser} />
+          <Button title="Login" onPress={loginUser} />
         </View>
 
         <View style={styles.linkContainer}>

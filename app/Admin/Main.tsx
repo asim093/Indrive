@@ -1,18 +1,18 @@
 import React, { useEffect } from "react";
 import { View, SafeAreaView, Text, StyleSheet, Image } from "react-native";
 import AdminPanel from "../../components/Admin_Layout";
-import { useAuth } from "@/components/Authentication_context";
+// import { useAuth } from "@/components/Authentication_context";
 import { useNavigation } from "expo-router";
 
 const Admin = () => {
-  const { user, isAdmin } = useAuth(); 
+  // const { user, isAdmin } = useAuth(); 
   const navigation = useNavigation();
 
-  useEffect(() => {
-    if (!user || !isAdmin) {
-      navigation.navigate("/Auth/Login"); 
-    }
-  }, [user, isAdmin]);
+  // useEffect(() => {
+  //   if (!user || !isAdmin) {
+  //     navigation.navigate("/Auth/Login"); 
+  //   }
+  // }, [user, isAdmin]);
 
   return (
     <SafeAreaView style={styles.container}>

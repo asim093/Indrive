@@ -14,6 +14,7 @@ import {
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth } from "@/config/firebase/config";
 
 const Sidebar = ({ onToggle }) => {
@@ -41,9 +42,10 @@ const Sidebar = ({ onToggle }) => {
 
   const logoutHandler = async () => {
     try {
-      await signOut(auth); // Firebase Auth se logout
+      await AsyncStorage.removeItem("userRole");
+      await signOut(auth);
       alert("Admin logged out successfully");
-      router.push("/Auth/Login");
+      window.location.reload();
     } catch (error: any) {
       console.log("Logout Error:", error.message);
     }

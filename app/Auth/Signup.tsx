@@ -44,13 +44,12 @@ const Signup = () => {
       alert("User SignUp Successful");
       setUserIds((prevIds) => [...prevIds, docRef.id]);
       
-      // Navigate to the login page after successful signup
       router.push("/Auth/Login"); 
 
     } catch (error: any) {
       const errorMessage = error.message;
       console.log("Error:", errorMessage);
-      alert("Error during signup: " + errorMessage); // Alert user about the error
+      alert("Error during signup: " + errorMessage);
     }
   };
 
