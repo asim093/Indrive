@@ -7,7 +7,7 @@ import {
   FlatList,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter } from "expo-router"; // Using expo-router for routing
 import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../config/firebase/config";
 import AdminPanel from "../../components/Admin_Layout";
@@ -21,7 +21,7 @@ interface Driver {
 }
 
 const Showdriver = () => {
-  const router = useRouter();
+  const router = useRouter(); // Correct for expo-router
   const [drivers, setDrivers] = useState<Driver[]>([]);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const Showdriver = () => {
   const handleEdit = (item: Driver) => {
     router.push({
       pathname: "/Admin/Editdriver",
-      query: {
+      params: {
         id: item.id,
         driverName: item.driverName,
         phoneNumber: item.phoneNumber,
@@ -78,20 +78,21 @@ const Showdriver = () => {
     >
       <Text style={{ fontSize: 16 }}>{item.driverName}</Text>
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Button
-          title="Detail"
-          onPress={() => {
-            router.push({
-              pathname: "/Admin/Driverdetails",
-              query: {
-                id: item.id,
-                driverName: item.driverName,
-                phoneNumber: item.phoneNumber,
-                vehicle: item.vehicle,
-              },
-            });
-          }}
-        />
+      <Button
+  title="Detail"
+  onPress={() => {
+    router.push({
+      pathname: "/Admin/Driverdetails",
+      params: {
+        driverName: item.driverName,
+        phoneNumber: item.phoneNumber,
+        vehicle: item.vehicle,
+        email: item.email,
+      },
+    });
+  }}
+/>
+
         <Button title="Edit" onPress={() => handleEdit(item)} />
         <Button title="Delete" onPress={() => handleDelete(item.id)} />
       </View>

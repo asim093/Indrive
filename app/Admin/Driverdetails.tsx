@@ -1,28 +1,65 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView, Button } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Button, TouchableOpacity } from 'react-native';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
+
+// Define the type for driver details
+interface DriverDetailsType {
+  driverName?: string;
+  phoneNumber?: string;
+  vehicle?: string;
+  email?: string;
+}
 
 const DriverDetails = () => {
-  const params = useLocalSearchParams();
+  const params = useGlobalSearchParams();
   const router = useRouter();
+  
+  const [driverDetails, setDriverDetails] = useState<DriverDetailsType | null>(null);
+  
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+
+      const fetchData = async () => {
+        const { driverName, phoneNumber, vehicle, email } = params;
+        setDriverDetails({ driverName, phoneNumber, vehicle, email });
+      };
+
+      fetchData();
+    }
+  }, [params]); 
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.card}>
-         
-          <Text style={styles.driverName}>{params.driverName}</Text>
-          <Text style={styles.driverDetails}>Phone Number: {params.phoneNumber}</Text>
-          <Text style={styles.driverDetails}>Vehicle: {params.vehicle}</Text>
-          <Text style={styles.driverDetails}>Email: {params.driveremail}</Text>
+          {driverDetails ? (
+            <>
+              <Text style={styles.driverName}>{driverDetails.driverName || 'No Name Provided'}</Text>
+              <View style={styles.detailRow}>
+                <Text style={styles.driverDetails}>Phone:</Text>
+                <Text style={styles.driverDetailsValue}>{driverDetails.phoneNumber || 'N/A'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.driverDetails}>Vehicle:</Text>
+                <Text style={styles.driverDetailsValue}>{driverDetails.vehicle || 'N/A'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.driverDetails}>Email:</Text>
+                <Text style={styles.driverDetailsValue}>{driverDetails.email || 'N/A'}</Text>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.loadingText}>Loading data...</Text>
+          )}
         </View>
 
         <View style={styles.actions}>
-          <Button
-            title="Back to Driver List"
-            onPress={() => router.back()}
-            color="#0A74DA"  
-          />
+          <TouchableOpacity style={styles.button} onPress={() => router.push('/Admin/Showdriver')}>
+            <Text style={styles.buttonText}>Back to Driver List</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -51,26 +88,47 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
   },
-  profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 15,
-  },
   driverName: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 15,
+  },
+  detailRow: {
+    flexDirection: 'row',
     marginBottom: 10,
+    width: '100%',
+    justifyContent: 'space-between',
   },
   driverDetails: {
     fontSize: 16,
     color: '#555',
-    marginBottom: 5,
+  },
+  driverDetailsValue: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#999',
   },
   actions: {
     width: '100%',
-    marginTop: 20,
+    marginTop: 30,
+  },
+  button: {
+    backgroundColor: '#0A74DA',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

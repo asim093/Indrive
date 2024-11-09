@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, Alert } from "react-native";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../config/firebase/config";
 import { Picker } from "@react-native-picker/picker";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useGlobalSearchParams } from "expo-router";
 
 interface DriverParams {
   id: string;
@@ -13,7 +13,7 @@ interface DriverParams {
 }
 
 const Editdriver = () => {
-  const params = useLocalSearchParams<DriverParams>();
+  const params = useGlobalSearchParams<DriverParams>();
   const router = useRouter();
 
   const [driverName, setDriverName] = useState(params.driverName || "");
@@ -21,7 +21,7 @@ const Editdriver = () => {
   const [vehicle, setVehicle] = useState(params.vehicle || "");
 
   useEffect(() => {
-    console.log("Params received in Editdriver:", params);  
+    console.log("Params received in Editdriver:", params);
   }, [params]);
 
   const handleUpdate = async () => {
@@ -55,13 +55,25 @@ const Editdriver = () => {
       <Text style={{ fontSize: 24, marginBottom: 20 }}>Edit Driver</Text>
       <TextInput
         placeholder="Driver Name"
-        style={{ borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5, marginBottom: 15 }}
+        style={{
+          borderWidth: 1,
+          borderColor: "#ccc",
+          padding: 10,
+          borderRadius: 5,
+          marginBottom: 15,
+        }}
         value={driverName}
         onChangeText={setDriverName}
       />
       <TextInput
         placeholder="Phone Number"
-        style={{ borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5, marginBottom: 15 }}
+        style={{
+          borderWidth: 1,
+          borderColor: "#ccc",
+          padding: 10,
+          borderRadius: 5,
+          marginBottom: 15,
+        }}
         keyboardType="phone-pad"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
@@ -69,12 +81,19 @@ const Editdriver = () => {
       <Picker
         selectedValue={vehicle}
         onValueChange={(itemValue: any) => setVehicle(itemValue)}
-        style={{ borderWidth: 1, borderColor: "#ccc", borderRadius: 5, marginBottom: 20 }}
+        style={{
+          borderWidth: 1,
+          borderColor: "#ccc",
+          borderRadius: 5,
+          marginBottom: 20,
+        }}
       >
         <Picker.Item label="Select Vehicle" value="" />
         <Picker.Item label="Car" value="car" />
         <Picker.Item label="Bike" value="bike" />
-        <Picker.Item label="Truck" value="truck" />
+        <Picker.Item label="AC Car" value="ac_car" />
+        <Picker.Item label="Non-AC Car" value="non_ac_car" />
+        <Picker.Item label="Rickshaw" value="rickshaw" />
       </Picker>
       <Button title="Update Driver" onPress={handleUpdate} />
     </View>

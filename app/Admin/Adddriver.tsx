@@ -133,7 +133,7 @@ const AddDriver = () => {
             />
           </View>
 
-          <View style={{ marginVertical: 20 }}>
+          <View style={{ marginVertical: 10 }}>
             <Button title="Add Driver" onPress={handleSubmit} />
           </View>
         </ScrollView>
