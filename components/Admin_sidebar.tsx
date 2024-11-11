@@ -1,21 +1,11 @@
 import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-} from "react-native";
-import {
-  FontAwesome,
-  Feather,
-  MaterialIcons,
-  Entypo,
-} from "@expo/vector-icons";
+import { View, Text, TouchableOpacity, Animated, StyleSheet } from "react-native";
+import { FontAwesome, Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth } from "@/config/firebase/config";
+import { Alert } from "react-native";
 
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,12 +32,16 @@ const Sidebar = ({ onToggle }) => {
 
   const logoutHandler = async () => {
     try {
-      await AsyncStorage.removeItem("userRole");
-      await signOut(auth);
-      alert("Admin logged out successfully");
-      window.location.reload();
+      await AsyncStorage.removeItem("user_role");
+      await signOut(auth); 
+
+      Alert.alert("Logout Successful", "You have been logged out.");
+
+      router.push("/Auth/Login");
+
     } catch (error: any) {
       console.log("Logout Error:", error.message);
+      Alert.alert("Logout Error", "Something went wrong, please try again.");
     }
   };
 
@@ -62,10 +56,7 @@ const Sidebar = ({ onToggle }) => {
       </TouchableOpacity>
 
       <Animated.View
-        style={[
-          styles.sidebar,
-          { transform: [{ translateX: sidebarAnimation }], zIndex: 1 },
-        ]}
+        style={[styles.sidebar, { transform: [{ translateX: sidebarAnimation }], zIndex: 1 }]}
       >
         <Text style={styles.headerText}>Admin Panel</Text>
 
@@ -76,6 +67,7 @@ const Sidebar = ({ onToggle }) => {
           <FontAwesome name="dashboard" size={24} color="white" />
           <Text style={styles.menuText}>Dashboard</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.menuItem}
           onPress={() => router.push("/Admin/Adddriver")}
@@ -83,6 +75,7 @@ const Sidebar = ({ onToggle }) => {
           <Feather name="users" size={24} color="white" />
           <Text style={styles.menuText}>Add Driver</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.menuItem}
           onPress={() => router.push("/Admin/Showdriver")}
@@ -96,7 +89,6 @@ const Sidebar = ({ onToggle }) => {
           <Text style={styles.menuText}>Settings</Text>
         </TouchableOpacity>
 
-        {/* Logout button */}
         <TouchableOpacity style={styles.menuItem} onPress={logoutHandler}>
           <Feather name="log-out" size={24} color="white" />
           <Text style={styles.menuText}>Logout</Text>

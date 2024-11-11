@@ -1,46 +1,53 @@
-// // AuthContext.tsx
-
-// import React, { createContext, useState, useEffect, ReactNode } from "react";
+// // Authentication_context.tsx
+// import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
-// import { useRouter } from "expo-router";
 
-// // Define the structure of the AuthContext
-// type AuthContextType = {
-//   userRole: string | null;
-//   setUserRole: (role: string) => void;
-// };
+// interface AuthContextType {
+//   role: string | null;
+//   isAuthenticated: boolean;
+//   login: (role: string) => void; // Add login function here
+//   logout: () => void;
+// }
 
-// export const AuthContext = createContext<AuthContextType>({
-//   userRole: null,
-//   setUserRole: () => {},
-// });
+// const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// export const AuthProvider = ({ children }: { children: ReactNode }) => {
-//   const [userRole, setUserRole] = useState<string | null>(null);
-//   const router = useRouter();
+// interface AuthProviderProps {
+//   children: ReactNode;
+// }
+
+// export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+//   const [role, setRole] = useState<string | null>(null);
+//   const isAuthenticated = !!role;
 
 //   useEffect(() => {
-//     const checkUserRole = async () => {
+//     const loadRole = async () => {
 //       const storedRole = await AsyncStorage.getItem("userRole");
 //       if (storedRole) {
-//         setUserRole(storedRole);
+//         setRole(storedRole);
 //       }
 //     };
-
-//     checkUserRole();
+//     loadRole();
 //   }, []);
 
-//   useEffect(() => {
-//     if (userRole === "admin") {
-//       router.push("/Admin/Main");
-//     } else if (userRole === "user") {
-//       router.push("/UserPanel/Home");
-//     }
-//   }, [userRole, router]);
+//   const login = async (role: string) => {
+//     setRole(role);
+//     await AsyncStorage.setItem("userRole", role);
+//   };
+
+//   const logout = async () => {
+//     await AsyncStorage.removeItem("userRole");
+//     setRole(null);
+//   };
 
 //   return (
-//     <AuthContext.Provider value={{ userRole, setUserRole }}>
+//     <AuthContext.Provider value={{ role, isAuthenticated, login, logout }}>
 //       {children}
 //     </AuthContext.Provider>
 //   );
+// };
+
+// export const useAuth = () => {
+//   const context = useContext(AuthContext);
+//   if (!context) throw new Error("useAuth must be used within an AuthProvider");
+//   return context;
 // };

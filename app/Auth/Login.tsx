@@ -1,78 +1,74 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  TextInput,
-  StyleSheet,
-  Button,
-} from "react-native";
 import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, StyleSheet, Button, ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebase/config";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import Login_layout from "@/components/Login_layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = () => {
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
-  const [loading, isLoading] = useState("");
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const checkRoleFromStorage = async () => {
-      const storedRole = await AsyncStorage.getItem("userRole");
+    const checkRole = async () => {
+      const storedRole = await AsyncStorage.getItem("user_role"); 
       if (storedRole) {
-        setUserRole(storedRole);
+        setRole(storedRole);
       }
+      setIsLoading(false);
     };
 
-    checkRoleFromStorage();
+    checkRole();
   }, []);
 
   useEffect(() => {
-    if (userRole) {
-      if (userRole === "admin") {
+    if (role) {
+      if (role === "admin") {
         alert("Admin Login Successfully");
-
-        window.location.reload();
         router.push("/Admin/Main");
-      } else {
+      } else if (role === "user") {
         alert("User Login Successfully");
-
-        window.location.reload();
         router.push("/UserPanel/Home");
       }
     }
-  }, [userRole]);
+  }, [role]);
 
   const loginUser = async () => {
+    setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      const userRole = user.email === "admin@gmail.com" ? "admin" : "user";
 
-      const role = user.email === "admin@gmail.com" ? "admin" : "user";
-      await AsyncStorage.setItem("userRole", role);
-
-      setUserRole(role); // This will trigger the useEffect for navigation
-    } catch (error: any) {
+      await AsyncStorage.setItem("user_role", userRole); 
+      setRole(userRole); // Update state
+    } catch (error:any) {
       alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <SafeAreaProvider>
+        <Login_layout>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </Login_layout>
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
-      {}
       <Login_layout>
-        <Text style={{ textAlign: "center", fontSize: 20, margin: 20 }}>
-          Login User
-        </Text>
+        <Text style={{ textAlign: "center", fontSize: 20, margin: 20 }}>Login User</Text>
         <TextInput
           style={styles.input}
           onChangeText={onChangeEmail}
@@ -84,18 +80,17 @@ const Login = () => {
           onChangeText={onChangePassword}
           value={password}
           placeholder="Enter your password"
-          secureTextEntry={true}
+          secureTextEntry
         />
         <View style={{ margin: 10 }}>
           <Button title="Login" onPress={loginUser} />
         </View>
 
-        <View style={styles.linkContainer}>
-          <Text>Not a User? </Text>
-          <Link href={"/Auth/Signup"} style={styles.link}>
-            SignUp
-          </Link>
-        </View>
+        {loading && (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        )}
       </Login_layout>
     </SafeAreaProvider>
   );
@@ -110,20 +105,11 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#f9f9f9",
     borderRadius: 5,
-    shadowColor: "#c0f11c",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 10,
   },
-  linkContainer: {
-    flexDirection: "row",
+  loaderContainer: {
     justifyContent: "center",
-    marginVertical: 0,
-  },
-  link: {
-    color: "#007BFF",
-    fontWeight: "bold",
+    alignItems: "center",
+    marginTop: 20,
   },
 });
 

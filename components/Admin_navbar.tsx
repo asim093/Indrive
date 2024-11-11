@@ -26,6 +26,7 @@ const Navbar = () => {
             borderRadius: 20,
             paddingHorizontal: 10,
             width: "70%",
+            marginLeft:"20%",
             height: 40,
           }}
         />

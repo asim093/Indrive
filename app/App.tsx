@@ -1,12 +1,12 @@
-
+// // App.tsx
 // import React from "react";
-// import { AuthProvider } from "../components/Authentication_context"; 
-// import Layout from "./_layout";  // Import Layout
+// import { AuthProvider } from "../components/";
+// import MainLayout from "./_layout";
 
 // const App = () => {
 //   return (
 //     <AuthProvider>
-//       <Layout /> 
+//       <MainLayout />
 //     </AuthProvider>
 //   );
 // };
