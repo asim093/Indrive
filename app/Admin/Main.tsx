@@ -1,26 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, SafeAreaView, Text, StyleSheet, ImageBackground } from "react-native";
 import AdminPanel from "../../components/Admin_Layout";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Import icons
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 
 const Admin = () => {
+  const router = useRouter();
+
+  
   return (
     <SafeAreaView style={styles.container}>
       <AdminPanel>
         <View style={styles.mainContent}>
           {/* Image Background */}
-          <ImageBackground
+          {/* <ImageBackground
             source={{
               uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYZM8cq7o8pziavfJSUIZkeTIMHxnoJcidQg&s"
             }}
             style={styles.headerBackground}
-          >
+          > */}
             {/* Overlay to enhance text visibility */}
-            <View style={styles.headerOverlay}>
+            {/* <View style={styles.headerOverlay}>
               <Text style={styles.title}>Welcome, Admin!</Text>
               <Text style={styles.subtitle}>Manage your operations with ease</Text>
             </View>
-          </ImageBackground>
+          </ImageBackground> */}
 
           {/* Cards for Stats */}
           <View style={styles.cardsContainer}>

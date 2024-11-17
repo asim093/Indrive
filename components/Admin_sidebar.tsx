@@ -1,11 +1,10 @@
 import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, Animated, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Animated, StyleSheet, Alert } from "react-native";
 import { FontAwesome, Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth } from "@/config/firebase/config";
-import { Alert } from "react-native";
 
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,34 +12,22 @@ const Sidebar = ({ onToggle }) => {
   const router = useRouter();
 
   const toggleSidebar = () => {
-    if (isOpen) {
-      Animated.timing(sidebarAnimation, {
-        toValue: -200,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(sidebarAnimation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
+    Animated.timing(sidebarAnimation, {
+      toValue: isOpen ? -200 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
     setIsOpen(!isOpen);
     onToggle();
   };
 
   const logoutHandler = async () => {
     try {
-      await AsyncStorage.removeItem("user_role");
       await signOut(auth); 
-
       Alert.alert("Logout Successful", "You have been logged out.");
-
-      router.push("/Auth/Login");
-
+      router.push("/Auth/Login"); 
     } catch (error: any) {
-      console.log("Logout Error:", error.message);
+      console.error("Logout Error:", error.message);
       Alert.alert("Logout Error", "Something went wrong, please try again.");
     }
   };

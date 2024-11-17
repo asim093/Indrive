@@ -1,156 +1,152 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import * as Location from 'expo-location';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../../config/firebase/config";
 import { Picker } from "@react-native-picker/picker";
-import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
-import { db } from '../../config/firebase/config'; // Assuming you have set up Firebase config in firebase.js
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import AdminPanel from "@/components/Admin_Layout";
+import { useRouter } from "expo-router";
 
-// Vehicle Options
-const vehicleOptions = [
-  { label: 'Select Vehicle', value: '' },
-  { label: 'Car', value: 'car' },
-  { label: 'Bike', value: 'bike' },
-  { label: 'AC Car', value: 'ac_car' },
-  { label: 'Non-AC Car', value: 'non_ac_car' },
-  { label: 'Rickshaw', value: 'rickshaw' },
-];
+export default function AddDriver() {
+  const [driverName, setDriverName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [vehicle, setVehicle] = useState("Bike"); // Default to 'Bike'
+  const router = useRouter();
 
-export default function RideBookingScreen() {
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [destination, setDestination] = useState('');
-  const [selectedVehicle, setSelectedVehicle] = useState('');
-  const [drivers, setDrivers] = useState<any[]>([]);
-  const [distance, setDistance] = useState<number | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
-  const [driverDetails, setDriverDetails] = useState<any>(null);
+  const handleAddDriver = async () => {
+    if (!driverName || !email || !phoneNumber || !password || !vehicle) {
+      alert("Please fill all the fields");
+      return;
+    }
+    
+    try {
+      const auth = getAuth();
+      await createUserWithEmailAndPassword(auth, email, password);
+      
+      await addDoc(collection(db, "drivers"), {
+        driverName,
+        email,
+        phoneNumber,
+        vehicle,
+      });
+      
+      
+      
+      alert("Driver added successfully");
+      
+      setDriverName("");
+      setEmail("");
+      setPassword("");
+      setPhoneNumber("");
+      setVehicle("Bike"); 
+      
+      router.push("/Admin/Showdriver");
 
-  useEffect(() => {
-    // Fetch user location when the component mounts
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      }
-    })();
-  }, []);
 
-  // Fetch drivers based on the selected vehicle
-  const fetchDrivers = async () => {
-    if (!selectedVehicle) return;
 
-    const driversRef = db.collection('drivers');
-    const snapshot = await driversRef.where('vehicle', '==', selectedVehicle).get();
-    const fetchedDrivers = snapshot.docs.map((doc:any) => doc.data());
-    setDrivers(fetchedDrivers);
-  };
 
-  // Calculate distance using Mapbox Directions API
-  const calculateDistance = async (driverLocation: { latitude: number; longitude: number }) => {
-    if (!userLocation) return;
-
-    const origin = `${userLocation.longitude},${userLocation.latitude}`;
-    const destination = `${driverLocation.longitude},${driverLocation.latitude}`;
-
-    const response = await fetch(
-      `https://api.mapbox.com/directions/v5/mapbox/driving/${origin};${destination}?access_token=YOUR_MAPBOX_ACCESS_TOKEN`
-    );
-    const data = await response.json();
-    const routeDistance = data.routes[0]?.distance; // Distance in meters
-    setDistance(routeDistance / 1000); // Convert to kilometers
-  };
-
-  // Calculate price based on distance (example: price per km is 10)
-  const calculatePrice = (distance: number) => {
-    if (!distance) return;
-    const pricePerKm = 10; // Example rate per km
-    setPrice(distance * pricePerKm);
-  };
-
-  // Handle selecting a driver
-  const handleFindDriver = async () => {
-    const selectedDriver = drivers[0]; // Choose the first driver (could implement a more sophisticated selection)
-    setDriverDetails(selectedDriver);
-    await calculateDistance(selectedDriver.location); // Assuming driver has a `location` field with latitude/longitude
-    calculatePrice(distance || 0); // Calculate price for the ride
+    } catch (error:any) {
+      console.error("Error adding driver: ", error);
+      alert(`Failed to add driver: ${error.message}`);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Select Vehicle</Text>
-      <Picker selectedValue={selectedVehicle} onValueChange={setSelectedVehicle}>
-        {vehicleOptions.map((option) => (
-          <Picker.Item key={option.value} label={option.label} value={option.value} />
-        ))}
-      </Picker>
+    <AdminPanel>
+      <View style={styles.container}>
+        <Text style={styles.label}>Driver Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Driver Name"
+          value={driverName}
+          onChangeText={setDriverName}
+        />
 
-      {/* Destination Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Destination"
-        value={destination}
-        onChangeText={setDestination}
-      />
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
 
-      {/* Find Driver Button */}
-      <TouchableOpacity style={styles.findDriverButton} onPress={handleFindDriver}>
-        <Text style={styles.buttonText}>Find a Driver</Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      {/* Show Driver Data */}
-      {driverDetails && (
-        <View style={styles.driverDetails}>
-          <Text style={styles.driverText}>Driver Name: {driverDetails.driverName}</Text>
-          <Text style={styles.driverText}>Email: {driverDetails.email}</Text>
-          <Text style={styles.driverText}>Phone: {driverDetails.phoneNumber}</Text>
-          <Text style={styles.driverText}>Vehicle: {driverDetails.vehicle}</Text>
-          <Text style={styles.driverText}>Distance: {distance} km</Text>
-          <Text style={styles.driverText}>Price: Rs. {price}</Text>
-        </View>
-      )}
-    </View>
+        <Text style={styles.label}>Phone Number</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Phone Number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+        />
+
+        <Text style={styles.label}>Vehicle Type</Text>
+        <Picker
+          selectedValue={vehicle}
+          style={styles.input}
+          onValueChange={(itemValue) => setVehicle(itemValue)}
+        >
+          <Picker.Item label="Bike" value="Bike" />
+          <Picker.Item label="Rickshaw" value="Rickshaw" />
+          <Picker.Item label="AC Car" value="AC Car" />
+          <Picker.Item label="Non-AC Car" value="Non-AC Car" />
+          <Picker.Item label="Truck" value="Truck" />
+        </Picker>
+
+        <TouchableOpacity style={styles.addButton} onPress={handleAddDriver}>
+          <Text style={styles.buttonText}>Add Driver</Text>
+        </TouchableOpacity>
+      </View>
+    </AdminPanel>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 0,
+    paddingHorizontal: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
+    height: 50,
+    borderColor: "#ddd",
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
   },
-  findDriverButton: {
-    backgroundColor: '#00c853',
+  addButton: {
+    backgroundColor: "#00c853",
     paddingVertical: 10,
     borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 20,
+    alignItems: "center",
+    marginTop: 20,
+    height: 40,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-  },
-  driverDetails: {
-    padding: 10,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 5,
-  },
-  driverText: {
-    fontSize: 14,
-    marginBottom: 5,
   },
 });

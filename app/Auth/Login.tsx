@@ -11,49 +11,34 @@ const Login = () => {
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const checkRole = async () => {
-      const storedRole = await AsyncStorage.getItem("user_role"); 
-      if (storedRole) {
-        setRole(storedRole);
+      const storedRole = await AsyncStorage.getItem("Role");
+      if (storedRole === "Admin") {
+        router.push("/Admin/Main");
+      } else if (storedRole === "User") {
+        router.push("/UserPanel/Home");
       }
       setIsLoading(false);
     };
-
     checkRole();
   }, []);
 
-  useEffect(() => {
-    if (role) {
-      if (role === "admin") {
-        alert("Admin Login Successfully");
-        router.push("/Admin/Main");
-      } else if (role === "user") {
-        alert("User Login Successfully");
-        router.push("/UserPanel/Home");
-      }
-    }
-  }, [role]);
+const loginUser = async () => {
+  setLoading(true);
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Login successful");
+  } catch (error: any) {
+    console.log(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const loginUser = async () => {
-    setLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const userRole = user.email === "admin@gmail.com" ? "admin" : "user";
-
-      await AsyncStorage.setItem("user_role", userRole); 
-      setRole(userRole); // Update state
-    } catch (error:any) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (

@@ -1,9 +1,8 @@
 import { View, Text, SafeAreaView, Image, StyleSheet } from "react-native";
 import React from "react";
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Swiper from "react-native-swiper";
-import login_image from "../assets/images/login_images.png";
-import login_image_1 from "../assets/images/login_images_1.png";
 
 const Login_layout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -13,7 +12,10 @@ const Login_layout: React.FC<{ children: React.ReactNode }> = ({
       <SafeAreaView style={styles.container}>
         <Swiper style={styles.wrapper} showsPagination={false}>
           <View style={styles.slide}>
-            <Image source={login_image} style={styles.image} />
+            {/* <Image
+              source={require("./assets/images/login_images_1.png")}
+              style={{ width: 100, height: 100 }}
+            /> */}
             <View style={styles.textContainer}>
               <Text style={styles.slideText}>App Where You Set The Price</Text>
               <Text style={styles.slideDescription}>
@@ -22,7 +24,10 @@ const Login_layout: React.FC<{ children: React.ReactNode }> = ({
             </View>
           </View>
           <View style={styles.slide}>
-            <Image source={login_image_1} style={styles.image} />
+            {/* <Image
+              source={require("./assets/images/login_images.png")}
+              style={{ width: 100, height: 100 }}
+            /> */}
             <View style={styles.textContainer}>
               <Text style={styles.slideText}>Your Safety is our Priority</Text>
               <Text style={styles.slideDescription}>
@@ -43,22 +48,22 @@ const Login_layout: React.FC<{ children: React.ReactNode }> = ({
 // Styles for the components
 const styles = StyleSheet.create({
   container: {
-    paddingVertical:10,
+    paddingVertical: 10,
     flex: 1,
-    justifyContent: "flex-start", // Align content to the start
+    justifyContent: "flex-start",
   },
   wrapper: {
-    height: 300, // Adjust the height of the Swiper
+    height: 400,
   },
   slide: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: 200,
+    height: 300,
   },
   image: {
     width: "80%", // Adjust the width as needed
-    height: 200, // Adjust image height as needed
+    height: 300, // Adjust image height as needed
     objectFit: "contain",
   },
   textContainer: {
@@ -75,7 +80,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   childrenContainer: {
-    paddingTop: 0, 
+    paddingTop: 0,
   },
 });
 

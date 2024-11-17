@@ -11,7 +11,7 @@ const AdminPanel: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View style={{ flex: 1, flexDirection: 'row' , paddingTop:40, }}>
       <Sidebar onToggle={handleToggleSidebar} />
       <View style={{ flex: 1 }}>
         <Navbar />

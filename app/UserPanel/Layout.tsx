@@ -1,40 +1,30 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { View, Button, Text } from "react-native";
+import { View, Button, Text, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Home from "./Home";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import Login from "../Auth/Login";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/config/firebase/config";
+import { useRouter } from "expo-router";
+import BookRideScreen from "./Bookride";
 
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = ({ navigation }: DrawerContentComponentProps) => {
+  const router = useRouter();
   const handleLogout = async () => {
-    console.log('working');
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
-        const uid = user.uid;
-    console.log(uid);
-
-        // ...
-      } else {
-        console.log('logout');
-        
-        // User is signed out
-        // ...
-      }})
-    
-    // try {
-    //   await AsyncStorage.removeItem("user_role");
-    //   navigation.navigate("/Auth/Login");  // Ensure "Login" is the correct route name
-    // } catch (error) {
-    //   console.error("Failed to remove user role:", error);
-    // }
+    try {
+      await signOut(auth);
+      await AsyncStorage.removeItem("Role");
+      Alert.alert("Logout Successful", "You have been logged out.");
+      router.push("/Auth/Login");
+    } catch (error: any) {
+      console.error("Logout Error:", error.message);
+      Alert.alert("Logout Error", "Something went wrong, please try again.");
+    }
   };
 
   return (
@@ -52,7 +42,8 @@ const UserPanelLayout = () => {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen name="Home" component={Home} />
-      {/* <Drawer.Screen name="Login" component={Login} />   */}
+      <Drawer.Screen name="Bookride" component={BookRideScreen} />
+    
     </Drawer.Navigator>
   );
 };

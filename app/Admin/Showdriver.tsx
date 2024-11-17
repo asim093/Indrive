@@ -55,6 +55,7 @@ const Showdriver = () => {
   };
 
   const handleEdit = (item: Driver) => {
+    console.log("Edit wok")
     router.push({
       pathname: "/Admin/Editdriver",
       params: {
@@ -81,6 +82,8 @@ const Showdriver = () => {
       <Button
   title="Detail"
   onPress={() => {
+    console.log("details wok")
+
     router.push({
       pathname: "/Admin/Driverdetails",
       params: {

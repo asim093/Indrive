@@ -1,53 +1,63 @@
-// // Authentication_context.tsx
-// import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { auth, db } from '../config/firebase/config';
+import { getDoc, doc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// interface AuthContextType {
-//   role: string | null;
-//   isAuthenticated: boolean;
-//   login: (role: string) => void; // Add login function here
-//   logout: () => void;
-// }
+export interface User {
+  uid: string;
+  email: string | null;
+  role: string;
+}
 
-// const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  logout: () => Promise<void>;
+}
 
-// interface AuthProviderProps {
-//   children: ReactNode;
-// }
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-//   const [role, setRole] = useState<string | null>(null);
-//   const isAuthenticated = !!role;
+interface AuthProviderProps {
+  children: ReactNode; 
+}
 
-//   useEffect(() => {
-//     const loadRole = async () => {
-//       const storedRole = await AsyncStorage.getItem("userRole");
-//       if (storedRole) {
-//         setRole(storedRole);
-//       }
-//     };
-//     loadRole();
-//   }, []);
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-//   const login = async (role: string) => {
-//     setRole(role);
-//     await AsyncStorage.setItem("userRole", role);
-//   };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const userData = userDoc.data();
 
-//   const logout = async () => {
-//     await AsyncStorage.removeItem("userRole");
-//     setRole(null);
-//   };
+        if (userData?.role) {
+          const loggedInUser = { uid: currentUser.uid, email: currentUser.email, role: userData.role };
+          setUser(loggedInUser);
 
-//   return (
-//     <AuthContext.Provider value={{ role, isAuthenticated, login, logout }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
+          // Save role to AsyncStorage
+          await AsyncStorage.setItem('Role', userData.role);
+        }
+      } else {
+        setUser(null);
+        await AsyncStorage.removeItem('Role');
+      }
+      setLoading(false);
+    });
 
-// export const useAuth = () => {
-//   const context = useContext(AuthContext);
-//   if (!context) throw new Error("useAuth must be used within an AuthProvider");
-//   return context;
-// };
+    return () => unsubscribe();
+  }, []);
+
+  const logout = async () => {
+    await auth.signOut();
+    setUser(null);
+    await AsyncStorage.removeItem('Role');
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

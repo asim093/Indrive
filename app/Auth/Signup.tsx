@@ -34,11 +34,11 @@ const Signup = () => {
         password
       );
       const user = userCredential.user;
-      console.log("User registered:", user);
 
       const docRef = await addDoc(collection(db, "users"), {
         email: email,
         createdAt: new Date(),
+        role : "User",
       });
       
       alert("User SignUp Successful");
